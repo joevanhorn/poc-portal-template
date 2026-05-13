@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>POC Implementation Guide — placeholder</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: #1a1f2e; }
+  h1 { font-size: 22pt; margin-bottom: 6px; }
+  h2 { color: #1a1f2e; font-size: 15pt; margin: 30px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #007dc1; }
+  .callout { background: #f5f7fa; border-left: 4px solid #007dc1; padding: 14px 16px; margin: 15px 0; border-radius: 6px; }
+  code { background: #f5f7fa; padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.9em; }
+</style>
+</head>
+<body>
+
+<h1>POC Implementation Guide</h1>
+<p>This is a placeholder. Replace <code>content/guide.html</code> with your real customer-facing implementation guide.</p>
+
+<div class="callout">
+  <strong>Hint:</strong> the file is read server-side by <code>lib/guide.ts</code>, which extracts the <code>&lt;style&gt;</code> blocks and the <code>&lt;body&gt;</code> contents and renders them inside the authenticated SPA shell. Inline <code>&lt;script&gt;</code> tags are stripped — Mermaid is loaded separately via <code>next/script</code> in <code>app/layout.tsx</code>, so any <code>&lt;div class="mermaid"&gt;</code> blocks will render automatically.
+</div>
+
+<h2>How to swap in your guide</h2>
+<ol>
+  <li>Drop your standalone HTML file at <code>content/guide.html</code> (overwriting this placeholder).</li>
+  <li>If your guide uses Mermaid diagrams, ensure each diagram is wrapped in <code>&lt;div class="mermaid"&gt;...&lt;/div&gt;</code> and you can remove your own Mermaid <code>&lt;script&gt;</code> tags — the layout loads them.</li>
+  <li>Set the <code>NEXT_PUBLIC_BRAND_*</code> env vars in Vercel to customize titles, login page text, and the browser <code>&lt;title&gt;</code>.</li>
+  <li>Deploy. The portal session-gates the guide via <code>next-auth</code> against the Okta OIDC app provisioned by <a href="https://github.com/joevanhorn/ofcto-workforce-taskvantage/tree/main/modules/poc-portal">modules/poc-portal</a>.</li>
+</ol>
+
+</body>
+</html>
