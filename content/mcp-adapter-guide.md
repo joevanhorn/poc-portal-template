@@ -32,10 +32,15 @@ Your environment exposes three services (substitute your hostnames):
 | --- | --- | --- |
 | **MCP Adapter** | `https://<adapter-host>` | OAuth gateway — **agents connect here** |
 | **Admin UI** | `https://<admin-host>` | Manage agents, resources, and managed connections |
-| **MCP Server(s)** | `https://<mcp-host>` | Backend tools (your systems) |
+| **MCP Server(s)** | `https://<mcp-host>` | Backend tools — your systems (for example, a CRM such as **Salesforce** and an ITSM such as **ServiceNow**) |
 
 The adapter is the only endpoint agents touch; it brokers identity and routes authorized tool calls
 to the backend MCP server(s).
+
+> **System-agnostic.** The adapter can front **any** MCP-over-HTTP backend. This guide uses a CRM
+> (Salesforce) and an ITSM (ServiceNow) as running examples to make the patterns concrete — they are
+> **examples, not requirements**. Swap in whatever systems you need (see
+> [Bringing your own MCP server](#bringing-your-own-mcp-server-custom-tools)).
 
 ---
 
@@ -110,8 +115,13 @@ Group membership is the access lever — define one read + one write group per t
 
 | Group | Scopes granted | Tools visible |
 | --- | --- | --- |
-| `<App>-Read` | `app:read`, `mcp:read` | read tools for that system |
-| `<App>-Write` | `app:read`, `app:write`, `mcp:read` | all tools for that system |
+| `<App>-Read` | `<app>:read`, `mcp:read` | read tools for that system |
+| `<App>-Write` | `<app>:read`, `<app>:write`, `mcp:read` | all tools for that system |
+
+Define one read + one write group per tool family. For example, a deployment that connects
+Salesforce and ServiceNow might use `CRM-Read` / `CRM-Write` (scopes `sfdc:read` / `sfdc:write`) and
+`ITSM-Read` / `ITSM-Write` (scopes `snow:read` / `snow:write`) — illustrative examples of the
+pattern, not a required set.
 
 ### Step 5 — Verify in the Admin UI
 
@@ -155,9 +165,12 @@ revokes — scope filtering is invisible, not disabled.
 The MCP server filters `tools/list` by the token's scopes so unauthorized tools never appear:
 
 ```python
+# Example registry — tool names and scopes are illustrative (here: a CRM + an ITSM backend).
 ALL_TOOLS = [
-    {"name": "app_get_record",    "scope": "app:read"},
-    {"name": "app_update_record", "scope": "app:write"},
+    {"name": "sfdc_get_account",    "scope": "sfdc:read"},
+    {"name": "sfdc_update_account", "scope": "sfdc:write"},
+    {"name": "snow_lookup_ticket",  "scope": "snow:read"},
+    {"name": "snow_create_ticket",  "scope": "snow:write"},
 ]
 
 def list_tools(token_scopes):
@@ -221,7 +234,8 @@ strictly with the user's authority. **Fail closed:** if FGA errors or times out,
 
 ## Bringing your own MCP server (custom tools)
 
-To put your own tools behind the same Okta-governed adapter, deploy an MCP server and register it as
+The example backends in this guide (a Salesforce CRM and a ServiceNow ITSM) are just that — examples.
+To put **any** tools behind the same Okta-governed adapter, deploy an MCP server and register it as
 a backend.
 
 ### Backend contract
